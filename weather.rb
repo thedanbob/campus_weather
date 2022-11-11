@@ -57,7 +57,7 @@ end
 data = packet.match(/\A\x06(LOO.+\n\r.{2})\z/m)
 if data.nil? || crc16_ccitt(data[1]) != 0
   puts 'Received malformed packet'
-  return
+  exit 1
 end
 
 # Extract bytes 8-9, 13-14, 15, 34, 90 (little-endian)
