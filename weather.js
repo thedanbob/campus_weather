@@ -1,10 +1,8 @@
 #!/usr/bin/env node
 // Usage: env TOKEN=<token> ./weather.js <url></url>
 
-const { Buffer } = require('node:buffer')
-const https = require('node:https')
+const https = require('node:https') // stdlib
 const { SerialPort } = require('serialport')
-const { InterByteTimeoutParser } = require('@serialport/parser-inter-byte-timeout')
 const { ByteLengthParser } = require('@serialport/parser-byte-length')
 
 const FORECASTS = {
@@ -38,7 +36,7 @@ const readyParser = new ByteLengthParser({ length: 2 })
 const packetParser = new ByteLengthParser({ length: 100 })
 
 let count = 0
-let timer = setInterval(function() {
+let readyTimer = setInterval(function() {
   if (++count == 3) {
     console.log('Station not ready')
     port.close()
@@ -48,26 +46,28 @@ let timer = setInterval(function() {
   port.write('\n')
 }, 1200)
 
+let packetTimer
+
 const readyCallback = function(data) {
-  if (data == '\n\r') {
-    clearInterval(timer)
+  if (data != '\n\r') return
 
-    port.unpipe(readyParser)
-    port.pipe(packetParser)
-    packetParser.once('data', packetCallback)
+  clearInterval(readyTimer)
 
-    port.write('LOOP 1\n')
-  }
+  port.unpipe(readyParser)
+  port.pipe(packetParser)
+  packetParser.once('data', packetCallback)
+
+  port.write('LOOP 1\n')
+
+  packetTimer = setTimeout(function() {
+    console.log('Timed out before receiving packet')
+    process.exit(1)
+  }, 1200)
 }
 
 const packetCallback = function(packet) {
+  clearTimeout(packetTimer)
   port.close()
-
-  if (packet.length < 100) {
-    console.log('Received incomplete data')
-    port.close()
-    process.exit(1)
-  }
 
   if (!new String(packet).match(/^\x06LOO.+\n\r.{2}$/s) || crc16_ccitt(packet.slice(1)) != 0) {
     console.log('Received malformed packet')
