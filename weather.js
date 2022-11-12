@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Usage: env TOKEN=<token> ./weather.js <url></url>
+// Usage: env TOKEN=<token> ./weather.js <url>
 
 const https = require('node:https') // stdlib
 const { SerialPort } = require('serialport')
