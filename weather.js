@@ -5,18 +5,6 @@ const https = require('node:https') // stdlib
 const { SerialPort } = require('serialport')
 const { ByteLengthParser } = require('@serialport/parser-byte-length')
 
-const FORECASTS = {
-  8: 'sunny',
-  6: 'partlycloudy',
-  2: 'cloudy',
-  3: 'rainy',
-  18: 'snowy',
-  19: 'snowy-rainy',
-  7: 'rainy',
-  22: 'snowy',
-  23: 'snowy-rainy',
-}
-
 const crc16_ccitt = function(data, init_crc=0) {
   let msb = init_crc >> 8
   let lsb = init_crc & 255
@@ -29,6 +17,18 @@ const crc16_ccitt = function(data, init_crc=0) {
   })
 
   return (msb << 8) + lsb
+}
+
+const FORECASTS = {
+  8: 'sunny',
+  6: 'partlycloudy',
+  2: 'cloudy',
+  3: 'rainy',
+  18: 'snowy',
+  19: 'snowy-rainy',
+  7: 'rainy',
+  22: 'snowy',
+  23: 'snowy-rainy',
 }
 
 const port = new SerialPort({ path: '/dev/ttyUSB0', baudRate: 19200 })

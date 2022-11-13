@@ -5,18 +5,6 @@ require 'json' # stdlib
 require 'net/http' #stdlib
 require 'serialport'
 
-Forecasts = {
-  8 => 'sunny',
-  6 => 'partlycloudy',
-  2 => 'cloudy',
-  3 => 'rainy',
-  18 => 'snowy',
-  19 => 'snowy-rainy',
-  7 => 'rainy',
-  22 => 'snowy',
-  23 => 'snowy-rainy'
-}
-
 def crc16_ccitt(data, init_crc=0)
   msb = init_crc >> 8
   lsb = init_crc & 255
@@ -30,6 +18,18 @@ def crc16_ccitt(data, init_crc=0)
 
   (msb << 8) + lsb
 end
+
+Forecasts = {
+  8 => 'sunny',
+  6 => 'partlycloudy',
+  2 => 'cloudy',
+  3 => 'rainy',
+  18 => 'snowy',
+  19 => 'snowy-rainy',
+  7 => 'rainy',
+  22 => 'snowy',
+  23 => 'snowy-rainy'
+}
 
 socket = SerialPort.new('/dev/ttyUSB0', 19200)
 socket.read_timeout = 1200

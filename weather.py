@@ -4,6 +4,16 @@
 import json, os, re, os, struct, sys, time # stdlib
 import requests, serial
 
+def crc16_ccitt(data, init_crc=0):
+    msb = init_crc >> 8
+    lsb = init_crc & 255
+    for b in data:
+        x = b ^ msb
+        x ^= (x >> 4)
+        msb = (lsb ^ (x >> 3) ^ (x << 4)) & 255
+        lsb = (x ^ (x << 5)) & 255
+    return (msb << 8) + lsb
+
 FORECASTS = {
     8: 'sunny',
     6: 'partlycloudy',
@@ -15,16 +25,6 @@ FORECASTS = {
     22: 'snowy',
     23: 'snowy-rainy',
 }
-
-def crc16_ccitt(data, init_crc=0):
-    msb = init_crc >> 8
-    lsb = init_crc & 255
-    for b in data:
-        x = b ^ msb
-        x ^= (x >> 4)
-        msb = (lsb ^ (x >> 3) ^ (x << 4)) & 255
-        lsb = (x ^ (x << 5)) & 255
-    return (msb << 8) + lsb
 
 socket = serial.Serial(port="/dev/ttyUSB0", baudrate=19200, timeout=1.2)
 
