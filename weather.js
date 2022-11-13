@@ -35,6 +35,7 @@ const port = new SerialPort({ path: '/dev/ttyUSB0', baudRate: 19200 })
 const readyParser = new ByteLengthParser({ length: 2 })
 const packetParser = new ByteLengthParser({ length: 100 })
 
+// Set timer for two more wakeup attempts after initial (bottom of file)
 let count = 0
 let readyTimer = setInterval(function() {
   if (++count == 3) {
@@ -46,8 +47,8 @@ let readyTimer = setInterval(function() {
   port.write('\n')
 }, 1200)
 
+// Once console wakes, replace parser, request packet, and setup packet timeout
 let packetTimer
-
 const readyCallback = function(data) {
   if (data != '\n\r') return
 
@@ -65,6 +66,7 @@ const readyCallback = function(data) {
   }, 1200)
 }
 
+// Process and send the received packet
 const packetCallback = function(packet) {
   clearTimeout(packetTimer)
   port.close()
@@ -101,5 +103,6 @@ const packetCallback = function(packet) {
   req.end()
 }
 
+// Attempt to wake console
 port.pipe(readyParser).on('data', readyCallback)
 port.write('\n')
