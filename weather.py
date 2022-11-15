@@ -1,11 +1,8 @@
 #!/usr/bin/env python
 # Usage: env TOKEN=<token> ./weather.py <url>
 
-# stdlib
-import json, os, re, struct, sys
-from datetime import datetime
-
-# other
+import json, os, re, struct, sys # stdlib
+from datetime import datetime # stdlib
 import requests, serial
 
 def crc16_ccitt(data, init_crc=0):
@@ -30,20 +27,20 @@ FORECASTS = {
     23: 'snowy-rainy',
 }
 
-socket = serial.Serial(port="/dev/ttyUSB0", baudrate=19200, timeout=1.2)
+port = serial.Serial(port="/dev/ttyUSB0", baudrate=19200, timeout=1.2)
 
 for _ in range(3):
-    socket.write(b'\n')
-    if socket.read(2) == b'\n\r':
+    port.write(b'\n')
+    if port.read(2) == b'\n\r':
         break
 else:
   print('Station not ready')
-  socket.close()
+  port.close()
   sys.exit(1)
 
-socket.write(b'LOOP 1\n')
-packet = socket.read(100)
-socket.close()
+port.write(b'LOOP 1\n')
+packet = port.read(100)
+port.close()
 
 if len(packet) < 100:
     print('Received incomplete data')
