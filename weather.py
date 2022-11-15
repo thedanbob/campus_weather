@@ -1,7 +1,11 @@
 #!/usr/bin/env python
 # Usage: env TOKEN=<token> ./weather.py <url>
 
-import json, os, re, os, struct, sys, time # stdlib
+# stdlib
+import json, os, re, struct, sys
+from datetime import datetime
+
+# other
 import requests, serial
 
 def crc16_ccitt(data, init_crc=0):
@@ -67,7 +71,7 @@ requests.post(
             'temperature': decoded[1] / 10,
             'wind_speed': decoded[2],
             'humidity': decoded[3],
-            'last_update': time.strftime('%Y-%m-%dT%H:%M:%S%z'),
+            'last_update': datetime.now().astimezone().isoformat(),
         }
     })
 )
