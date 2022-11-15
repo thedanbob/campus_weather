@@ -55,7 +55,7 @@ if data == None or crc16_ccitt(data[1]) != 0:
 decoded = struct.unpack('<7xH3xHB18xB55xB9x', data[1])
 
 requests.post(
-    sys.argv[0],
+    sys.argv[1],
     headers={
         'Authorization': 'Bearer {}'.format(os.environ['TOKEN']),
         'Content-Type': 'application/json'
