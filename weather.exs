@@ -91,6 +91,11 @@ end
 # Extract bytes 8-9, 13-14, 15, 34, 90 (little-endian)
 <<_::7*8, pressure::little-2*8, _::3*8, temperature::little-2*8, wind_speed::8, _::18*8, humidity::8, _::55*8, icon::8, _::bitstring>> = data |> List.first
 
+pressure = if pressure == 0, do: nil, else: pressure
+temperature = if temperature == 32767, do: nil, else: temperature
+wind_speed = if wind_speed == 255, do: nil, else: wind_speed
+humidity = if humidity == 255, do: nil, else: humidity
+
 {:ok, date} = DateTime.now("America/Chicago", Tz.TimeZoneDatabase)
 body = Jason.encode!(%{
   "state" => forecasts[icon],

@@ -52,7 +52,12 @@ if data == None or crc16_ccitt(data[1]) != 0:
     sys.exit(1)
 
 # Extract bytes 8-9, 13-14, 15, 34, 90 (little-endian)
-decoded = struct.unpack('<7xH3xHB18xB55xB9x', data[1])
+pressure, temperature, wind_speed, humidity, icon = struct.unpack('<7xH3xHB18xB55xB9x', data[1])
+
+if pressure == 0: pressure = None
+if temperature == 32767: temperature = None
+if wind_speed == 255: wind_speed = None
+if humidity == 255: humidity = None
 
 requests.post(
     sys.argv[1],
@@ -61,13 +66,13 @@ requests.post(
         'Content-Type': 'application/json'
     },
     data=json.dumps({
-        'state': FORECASTS[decoded[4]],
+        'state': FORECASTS[icon],
         'attributes': {
             'friendly_name': 'Campus Weather',
-            'pressure': decoded[0] / 1000,
-            'temperature': decoded[1] / 10,
-            'wind_speed': decoded[2],
-            'humidity': decoded[3],
+            'pressure': pressure / 1000,
+            'temperature': temperature / 10,
+            'wind_speed': wind_speed,
+            'humidity': humidity,
             'last_update': datetime.now().astimezone().isoformat(),
         }
     })

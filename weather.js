@@ -78,7 +78,16 @@ const packetCallback = function(packet) {
 
   // Extract bytes 8-9, 13-14, 15, 34, 90 (little-endian)
   // Packet has extra byte \x06 at the beginning
-  decoded = [packet.readUInt16LE(8), packet.readUInt16LE(13), packet.readUInt8(15), packet.readUInt8(34), packet.readUInt8(90)]
+  let pressure = packet.readUInt16LE(8),
+      temperature = packet.readUInt16LE(13),
+      wind_speed = packet.readUInt8(15),
+      humidity = packet.readUInt8(34),
+      icon = packet.readUInt8(90)
+
+  if (pressure == 0) pressure = null
+  if (temperature == 32767) temperature = null
+  if (wind_speed == 255) wind_speed = null
+  if (humidity == 255) humidity = null
 
   let req = https.request(process.argv[2], {
     method: 'POST',
@@ -89,13 +98,13 @@ const packetCallback = function(packet) {
   })
 
   req.write(JSON.stringify({
-    'state': FORECASTS[decoded[4]],
+    'state': FORECASTS[icon],
     'attributes': {
       'friendly_name': 'Campus Weather',
-      'pressure': decoded[0] / 1000,
-      'temperature': decoded[1] / 10,
-      'wind_speed': decoded[2],
-      'humidity': decoded[3],
+      'pressure': pressure / 1000,
+      'temperature': temperature / 10,
+      'wind_speed': wind_speed,
+      'humidity': humidity,
       'last_update': new Date(),
     }
   }))
