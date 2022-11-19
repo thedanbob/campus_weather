@@ -76,17 +76,20 @@ const packetCallback = function(packet) {
     process.exit(1)
   }
 
-  // Extract bytes 8-9, 13-14, 15, 34, 90 (little-endian)
+  // Extract bytes 8-9, 13-14, 15, 17-18, 34, 90 (little-endian)
   // Packet has extra byte \x06 at the beginning
   let pressure = packet.readUInt16LE(8),
       temperature = packet.readUInt16LE(13),
       wind_speed = packet.readUInt8(15),
+      wind_bearing = packet.readUInt16LE(17),
       humidity = packet.readUInt8(34),
       icon = packet.readUInt8(90)
 
   if (pressure == 0) pressure = null
   if (temperature == 32767) temperature = null
   if (wind_speed == 255) wind_speed = null
+  if (wind_bearing == 0) wind_bearing = null
+  if (wind_bearing == 360) wind_bearing = 0 // 0 = no data, 360 = 0°
   if (humidity == 255) humidity = null
 
   let req = https.request(process.argv[2], {
@@ -104,6 +107,7 @@ const packetCallback = function(packet) {
       'pressure': pressure / 1000,
       'temperature': temperature / 10,
       'wind_speed': wind_speed,
+      'wind_bearing': wind_bearing,
       'humidity': humidity,
       'last_update': new Date(),
     }

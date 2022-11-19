@@ -60,12 +60,14 @@ if data.nil? || crc16_ccitt(data[1]) != 0
   exit 1
 end
 
-# Extract bytes 8-9, 13-14, 15, 34, 90 (little-endian)
-pressure, temperature, wind_speed, humidity, icon = data[1].unpack('@7v@12vC@33C@89C')
+# Extract bytes 8-9, 13-14, 15, 17-18, 34, 90 (little-endian)
+pressure, temperature, wind_speed, wind_bearing, humidity, icon = data[1].unpack('@7v@12vCxv@33C@89C')
 
 pressure = nil if pressure == 0
 temperature = nil if temperature == 32767
 wind_speed = nil if if wind_speed == 255
+wind_bearing = nil if wind_bearing == 0
+wind_bearing = 0 if wind_bearing == 360 # 0 = no data, 360 = 0°
 humidity = nil if humidity == 255
 
 Net::HTTP.post(
@@ -77,6 +79,7 @@ Net::HTTP.post(
       pressure: pressure / 1000.0,
       temperature: temperature / 10.0,
       wind_speed: wind_speed,
+      wind_bearing: wind_bearing,
       humidity: humidity,
       last_update: Time.now.strftime('%FT%T%z'),
     }
